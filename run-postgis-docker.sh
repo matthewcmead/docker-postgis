@@ -32,18 +32,19 @@ do
              VOLUME=${OPTARG}
              ;;
          l)
-             LOCALPORT=${optarg}
+             LOCALPORT=${OPTARG}
              ;;
          u)
-             PGUSER=${optarg}
+             PGUSER=${OPTARG}
              ;;
          p)
              PGPASSWORD=${OPTARG}
              ;;
-         p)
-             DATADIR=${OPTARG}
+         d)
+             POSTGRES_DBNAME=${OPTARG}
              ;;
          *)
+             echo "unknown option: $OPTION"
              usage
              exit 1
              ;;
@@ -51,14 +52,20 @@ do
 done
 
 
-if [[ -z $VOLUME ]] || [[ -z $CONTAINER_NAME ]] || [[ -z $PGUSER ]] || [[ -z $PGPASSWORD ]] || [[ -z $DATADIR ]] || [[ -z $LOCALPORT ]]
+if [[ -z $VOLUME ]] || [[ -z $CONTAINER_NAME ]] || [[ -z $PGUSER ]] || [[ -z $PGPASSWORD ]] || [[ -z $POSTGRES_DBNAME ]] || [[ -z $LOCALPORT ]]
 
 then
+     echo VOLUME: $VOLUME
+     echo CONTAINER_NAME: $CONTAINER_NAME
+     echo PGUSER: $PGUSER
+     echo PGPASSWORD: $PGPASSWORD
+     echo POSTGRES_DBNAME: $POSTGRES_DBNAME
+     echo LOCALPORT: $LOCALPORT
      usage
      exit 1
 fi
 
-if [[ ! -z $LOCALPORT]]
+if [[ ! -z $LOCALPORT ]]
 then
     LOCALPORT=${LOCALPORT}
 else
@@ -85,11 +92,11 @@ CMD="docker run --name="${CONTAINER_NAME}" \
         --restart=always \
 	-e POSTGRES_USER=${PGUSER} \
 	-e POSTGRES_PASS=${PGPASSWORD} \
-	-e DATADIR=${DATADIR} \
+	-e POSTGRES_DBNAME=${POSTGRES_DBNAME} \
 	-d -t \
         ${VOLUME_OPTION} \
     -p "${LOCALPORT}:5432" \
-	kartoza/postgis /start-postgis.sh"
+	matthewcmead/postgis:9.6-2.3 /start-postgis.sh"
 
 echo 'Running\n'
 echo $CMD
